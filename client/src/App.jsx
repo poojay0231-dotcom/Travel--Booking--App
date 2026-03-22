@@ -6,6 +6,7 @@ import BookingConfirmed from "./pages/BookingConfirmed.jsx";
 import Login from "./pages/Login.jsx";
 import Register from "./pages/Register.jsx";
 import MyBookings from "./pages/MyBookings.jsx";
+import ProtectedRoute from "./components/ProtectedRoute.jsx";
 
 function App() {
   return (
@@ -13,11 +14,25 @@ function App() {
       <Routes>
         <Route path="/" element={<Home />} />
         <Route path="/destination/:slug" element={<DestinationDetails />} />
-        <Route path="/booking/:slug" element={<BookingForm />} />
+        <Route
+          path="/booking/:slug"
+          element={
+            <ProtectedRoute>
+              <BookingForm />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/my-bookings"
+          element={
+            <ProtectedRoute>
+              <MyBookings />
+            </ProtectedRoute>
+          }
+        />
         <Route path="/success" element={<BookingConfirmed />} />
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Register />} />
-        <Route path="/my-bookings" element={<MyBookings />} />
       </Routes>
     </Router>
   );

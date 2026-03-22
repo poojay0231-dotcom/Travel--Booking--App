@@ -1,9 +1,12 @@
 import { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
-import { saveToken } from "../utils/auth";
+import { useAuth } from "../context/AuthContext";
+
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || "http://localhost:5000";
 
 function Login() {
   const navigate = useNavigate();
+  const { login } = useAuth();
 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -12,7 +15,7 @@ function Login() {
     e.preventDefault();
 
     try {
-      const res = await fetch("http://localhost:5000/api/auth/login", {
+      const res = await fetch(`${API_BASE_URL}/api/auth/login`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -26,10 +29,10 @@ function Login() {
         throw new Error(data.message || "Login failed");
       }
 
-      saveToken(data.token);
+      await login(data.token);
       navigate("/");
     } catch (err) {
-      console.error(err);
+      console.error("Frontend login error:", err);
       alert(err.message);
     }
   };

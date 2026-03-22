@@ -62,4 +62,64 @@ router.get("/my-bookings", auth, async (req, res) => {
   }
 });
 
+// Get one booking by ID
+router.get("/:id", auth, async (req, res) => {
+  try {
+    const bookingId = Number(req.params.id);
+
+    const booking = await prisma.booking.findUnique({
+      where: { id: bookingId },
+      include: {
+        destination: true,
+      },
+    });
+
+    if (!booking) {
+      return res.status(404).json({ message: "Booking not found" });
+    }
+
+    if (booking.userId !== req.user.userId) {
+      return res.status(403).json({ message: "Not allowed" });
+    }
+
+    res.json(booking);
+  } catch (error) {
+    console.error("Error fetching booking:", error);
+    res.status(500).json({ message: "Failed to fetch booking" });
+  }
+});
+
+// Cancel booking
+router.patch("/:id/cancel", auth, async (req, res) => {
+  try {
+    const bookingId = Number(req.params.id);
+
+    const booking = await prisma.booking.findUnique({
+      where: { id: bookingId },
+    });
+
+    if (!booking) {
+      return res.status(404).json({ message: "Booking not found" });
+    }
+
+    if (booking.userId !== req.user.userId) {
+      return res.status(403).json({ message: "Not allowed" });
+    }
+
+    if (booking.status === "cancelled") {
+      return res.status(400).json({ message: "Booking already cancelled" });
+    }
+
+    const updatedBooking = await prisma.booking.update({
+      where: { id: bookingId },
+      data: { status: "cancelled" },
+    });
+
+    res.json(updatedBooking);
+  } catch (error) {
+    console.error("Error cancelling booking:", error);
+    res.status(500).json({ message: "Failed to cancel booking" });
+  }
+});
+
 module.exports = router;

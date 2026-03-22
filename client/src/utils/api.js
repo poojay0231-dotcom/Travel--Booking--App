@@ -1,6 +1,8 @@
 import { getToken } from "./auth";
 
-export async function apiFetch(url, options = {}) {
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || "http://localhost:5000";
+
+export async function apiFetch(path, options = {}) {
   const token = getToken();
 
   const headers = {
@@ -12,7 +14,7 @@ export async function apiFetch(url, options = {}) {
     headers.Authorization = `Bearer ${token}`;
   }
 
-  return fetch(url, {
+  return fetch(`${API_BASE_URL}${path}`, {
     ...options,
     headers,
   });

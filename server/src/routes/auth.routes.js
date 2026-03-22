@@ -3,6 +3,7 @@ const router = express.Router();
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
 const prisma = require("../config/prisma");
+const auth = require("../middleware/auth.middleware");
 
 const JWT_SECRET = process.env.JWT_SECRET || "supersecret";
 
@@ -84,6 +85,30 @@ router.post("/login", async (req, res) => {
   } catch (err) {
     console.error("Login error:", err);
     res.status(500).json({ message: "Login failed" });
+  }
+});
+
+// CURRENT USER
+router.get("/me", auth, async (req, res) => {
+  try {
+    const user = await prisma.user.findUnique({
+      where: { id: req.user.userId },
+      select: {
+        id: true,
+        name: true,
+        email: true,
+        role: true,
+      },
+    });
+
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    res.json(user);
+  } catch (err) {
+    console.error("Me error:", err);
+    res.status(500).json({ message: "Failed to fetch user" });
   }
 });
 

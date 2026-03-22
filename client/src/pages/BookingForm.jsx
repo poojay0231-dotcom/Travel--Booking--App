@@ -1,18 +1,21 @@
 import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
-import { isLoggedIn } from "../utils/auth";
 import { apiFetch } from "../utils/api";
+import { useAuth } from "../context/AuthContext";
+
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || "http://localhost:5000";
 
 function BookingForm() {
   const { slug } = useParams();
   const navigate = useNavigate();
+  const { isAuthenticated, loading: authLoading } = useAuth();
 
   const [destination, setDestination] = useState(null);
   const [travelers, setTravelers] = useState(1);
   const [travelDate, setTravelDate] = useState("");
 
   useEffect(() => {
-    fetch(`http://localhost:5000/api/destinations/${slug}`)
+    fetch(`${API_BASE_URL}/api/destinations/${slug}`)
       .then((res) => res.json())
       .then((data) => setDestination(data))
       .catch((err) => console.error(err));
@@ -21,14 +24,14 @@ function BookingForm() {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    if (!isLoggedIn()) {
+    if (!isAuthenticated) {
       alert("Please login first");
       navigate("/login");
       return;
     }
 
     try {
-      const res = await apiFetch("http://localhost:5000/api/bookings", {
+      const res = await apiFetch("/api/bookings", {
         method: "POST",
         body: JSON.stringify({
           destinationId: Number(destination.id),
@@ -50,7 +53,7 @@ function BookingForm() {
     }
   };
 
-  if (!destination) {
+  if (authLoading || !destination) {
     return <div className="p-6">Loading booking form...</div>;
   }
 
@@ -95,4 +98,4 @@ function BookingForm() {
   );
 }
 
-export default BookingForm;
+export default BookingForm;	
