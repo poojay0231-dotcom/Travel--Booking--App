@@ -1,5 +1,7 @@
 import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
+import { isLoggedIn } from "../utils/auth";
+import { apiFetch } from "../utils/api";
 
 function BookingForm() {
   const { slug } = useParams();
@@ -19,16 +21,15 @@ function BookingForm() {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    try {
-      const token = localStorage.getItem("token");
-      console.log("token from localStorage:", token);
+    if (!isLoggedIn()) {
+      alert("Please login first");
+      navigate("/login");
+      return;
+    }
 
-      const res = await fetch("http://localhost:5000/api/bookings", {
+    try {
+      const res = await apiFetch("http://localhost:5000/api/bookings", {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
         body: JSON.stringify({
           destinationId: Number(destination.id),
           travelers: Number(travelers),

@@ -3,6 +3,7 @@ const router = express.Router();
 const prisma = require("../config/prisma");
 const auth = require("../middleware/auth.middleware");
 
+// Create booking
 router.post("/", auth, async (req, res) => {
   try {
     const { destinationId, travelers, travelDate } = req.body || {};
@@ -36,6 +37,28 @@ router.post("/", auth, async (req, res) => {
   } catch (error) {
     console.error("Error creating booking:", error);
     res.status(500).json({ message: "Failed to create booking" });
+  }
+});
+
+// Get current user's bookings
+router.get("/my-bookings", auth, async (req, res) => {
+  try {
+    const bookings = await prisma.booking.findMany({
+      where: {
+        userId: req.user.userId,
+      },
+      include: {
+        destination: true,
+      },
+      orderBy: {
+        createdAt: "desc",
+      },
+    });
+
+    res.json(bookings);
+  } catch (error) {
+    console.error("Error fetching bookings:", error);
+    res.status(500).json({ message: "Failed to fetch bookings" });
   }
 });
 
